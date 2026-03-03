@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Candidate Attempts Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root{
+    --primary:#3b82f6;
+    --green:#22c55e;
+    --red:#ef4444;
+}
+
+/* GENERAL */
+body{
+    margin:0;
+    font-family:'Inter',sans-serif;
+    background:#f1f5f9; /* default light */
+    color:#111;
+    padding:20px;
+    transition:0.3s ease;
+}
+
+.container{
+    max-width:100%;
+    margin:auto;
+    background:#fff;
+    padding:20px;
+    border-radius:15px;
+    box-shadow:0 20px 50px rgba(0,0,0,0.1);
+    transition:0.3s;
+}
+
+/* HEADER & CONTROLS */
+.header{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    flex-wrap:wrap;
+    gap:10px;
+    margin-bottom:15px;
+}
+
+h2{
+    font-weight:700;
+    font-size:22px;
+}
+
+.controls{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    align-items:center;
+    width:100%;
+}
+
+/* INPUT & BUTTONS */
+input{
+    flex:1 1 150px;
+    padding:10px 14px;
+    border-radius:12px;
+    border:none;
+    outline:none;
+    background:#e2e8f0;
+    color:#111;
+}
+
+input::placeholder{
+    color:#64748b;
+}
+
+button{
+    padding:10px 14px;
+    border:none;
+    border-radius:12px;
+    cursor:pointer;
+    font-weight:600;
+    transition:0.3s ease;
+    min-width:90px;
+    height:38px;
+}
+
+.primary{
+    background:var(--primary);
+    color:white;
+}
+
+.primary:hover{
+    transform:translateY(-2px);
+    box-shadow:0 6px 15px rgba(59,130,246,0.3);
+}
+
+.secondary{
+    background:#10b981;
+    color:white;
+}
+
+.secondary:hover{
+    transform:translateY(-2px);
+    box-shadow:0 6px 15px rgba(16,185,129,0.3);
+}
+
+/* TOGGLE BUTTONS */
+.toggle-group{
+    display:flex;
+    flex-wrap:wrap;
+    background:#e2e8f0;
+    border-radius:12px;
+    overflow:hidden;
+}
+
+.toggle-btn{
+    flex:1;
+    padding:8px 10px;
+    border:none;
+    cursor:pointer;
+    background:transparent;
+    color:#111;
+    transition:0.3s;
+    font-weight:500;
+    font-size:0.85rem;
+}
+
+.toggle-btn.active{
+    background:var(--primary);
+    color:white;
+    font-weight:600;
+}
+
+/* TABLE */
+.table-container{
+    overflow-x:auto;
+    border-radius:12px;
+    margin-top:10px;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    min-width:700px;
+    font-size:0.85rem;
+}
+
+thead{
+    background:var(--primary);
+    color:#fff;
+    position:sticky;
+    top:0;
+    z-index:1;
+}
+
+th, td{
+    padding:10px;
+    text-align:center;
+}
+
+tbody tr:nth-child(even){
+    background:rgba(0,0,0,0.03);
+}
+
+tbody tr:hover{
+    background:rgba(59,130,246,0.15);
+}
+
+.pass{ color:var(--green); font-weight:600;}
+.fail{ color:var(--red); font-weight:600;}
+
+.empty{
+    text-align:center;
+    padding:15px;
+    opacity:0.7;
+}
+
+.loader{
+    text-align:center;
+    padding:15px;
+}
+
+.spinner{
+    border:4px solid rgba(0,0,0,0.1);
+    border-top:4px solid var(--primary);
+    border-radius:50%;
+    width:30px;
+    height:30px;
+    animation:spin 1s linear infinite;
+    margin:auto;
+}
+
+@keyframes spin{
+    to{ transform:rotate(360deg); }
+}
+
+/* RESPONSIVE */
+@media(max-width:768px){
+    h2{ font-size:20px;}
+    input, button{ font-size:0.8rem; padding:8px 10px;}
+    .toggle-btn{ font-size:0.75rem; padding:6px;}
+    th, td{ font-size:0.75rem; padding:6px;}
+    .header{flex-direction:column;align-items:flex-start;}
+    .controls{flex-direction:column;align-items:stretch;}
+}
+
+@media(max-width:480px){
+    h2{ font-size:18px;}
+    input{ flex:1 1 100%; margin-bottom:8px;}
+    button{ padding:6px 8px; font-size:0.7rem; margin-bottom:6px;}
+    .toggle-btn{ flex:1 1 30%; text-align:center;}
+    table{ font-size:0.65rem;}
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<div class="header">
+    <h2>🚀 Candidate Attempts Dashboard</h2>
+
+    <div class="controls">
+        <input type="text" id="searchInput" placeholder="Search name/email...">
+
+        <div class="toggle-group">
+            <button class="toggle-btn active" data-result="All">All</button>
+            <button class="toggle-btn" data-result="Pass">Pass</button>
+            <button class="toggle-btn" data-result="Fail">Fail</button>
+        </div>
+
+        <button id="scoreToggle" class="primary">Score ↑</button>
+        <button class="primary" onclick="loadAttempts()">Refresh</button>
+        <button class="secondary" onclick="exportCSV()">Export CSV</button>
+        <button id="themeToggle" class="secondary">🌙</button>
+    </div>
+</div>
+
+<div class="table-container">
+<table id="attemptTable">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Age</th>
+            <th>Score</th>
+            <th>Percentage</th>
+            <th>Grade</th>
+            <th>Result</th>
+            <th>Time</th>
+            <th>Date</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td colspan="9" class="loader"><div class="spinner"></div></td>
+        </tr>
+    </tbody>
+</table>
+</div>
+
+</div>
+
+<script>
+const backendURL = "http://localhost:3000/attempts";
+let allData = [];
+let resultFilter = "All";
+let scoreOrder = "asc";
+
+async function loadAttempts(){
+    const tbody = document.querySelector("#attemptTable tbody");
+    tbody.innerHTML = `<tr><td colspan="9" class="loader"><div class="spinner"></div></td></tr>`;
+    try{
+        const res = await fetch(backendURL);
+        allData = await res.json();
+        applyFilters();
+    }catch{
+        tbody.innerHTML = `<tr><td colspan="9" class="empty">Server Error</td></tr>`;
+    }
+}
+
+function applyFilters(){
+    const search = document.getElementById("searchInput").value.toLowerCase();
+    let filtered = allData.filter(item=>{
+        return ((item.Name.toLowerCase().includes(search) || item.Email.toLowerCase().includes(search)) &&
+                (resultFilter==="All" || item.Result===resultFilter));
+    });
+    filtered.sort((a,b)=> scoreOrder==="asc"? a.Score-b.Score : b.Score-a.Score);
+    renderTable(filtered);
+}
+
+function renderTable(data){
+    const tbody = document.querySelector("#attemptTable tbody");
+    if(data.length===0){
+        tbody.innerHTML=`<tr><td colspan="9" class="empty">No Data Found</td></tr>`;
+        return;
+    }
+    tbody.innerHTML="";
+    data.forEach(attempt=>{
+        const row=document.createElement("tr");
+        row.innerHTML=`
+            <td>${attempt.Name}</td>
+            <td>${attempt.Email}</td>
+            <td>${attempt.Age}</td>
+            <td>${attempt.Score}</td>
+            <td>${attempt.Percentage}</td>
+            <td>${attempt.Grade}</td>
+            <td class="${attempt.Result==='Pass'?'pass':'fail'}">${attempt.Result}</td>
+            <td>${attempt.TimeTaken}</td>
+            <td>${attempt.Timestamp ? new Date(attempt.Timestamp).toLocaleString() : '-'}</td>
+        `;
+        tbody.appendChild(row);
+    });
+}
+
+// Result toggle buttons
+document.querySelectorAll(".toggle-btn").forEach(btn=>{
+    btn.addEventListener("click", function(){
+        document.querySelectorAll(".toggle-btn").forEach(b=>b.classList.remove("active"));
+        this.classList.add("active");
+        resultFilter = this.dataset.result;
+        applyFilters();
+    });
+});
+
+// Score toggle
+document.getElementById("scoreToggle").addEventListener("click", function(){
+    scoreOrder = scoreOrder==="asc"?"desc":"asc";
+    this.textContent = scoreOrder==="asc"?"Score ↑":"Score ↓";
+    applyFilters();
+});
+
+// Theme toggle (optional)
+document.getElementById("themeToggle").addEventListener("click", function(){
+    document.body.classList.toggle("light");
+    this.textContent = document.body.classList.contains("light")?"☀️":"🌙";
+});
+
+document.getElementById("searchInput").addEventListener("input", applyFilters);
+
+function exportCSV(){
+    let csv="Name,Email,Age,Score,Percentage,Grade,Result,Time,Date\n";
+    allData.forEach(item=>{
+        csv+=`${item.Name},${item.Email},${item.Age},${item.Score},${item.Percentage},${item.Grade},${item.Result},${item.TimeTaken},${item.Timestamp}\n`;
+    });
+    const blob=new Blob([csv],{type:'text/csv'});
+    const url=window.URL.createObjectURL(blob);
+    const a=document.createElement("a");
+    a.href=url;
+    a.download="attempts.csv";
+    a.click();
+}
+
+loadAttempts();
+</script>
+
+</body>
+</html>

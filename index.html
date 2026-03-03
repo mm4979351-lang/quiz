@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Professional Assessment Quiz</title>
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:'Segoe UI',sans-serif;
+}
+
+html,body{
+  width:100%;
+  height:100%;
+}
+
+body{
+  background:linear-gradient(135deg,#eaf3ff,#c7dbff);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  min-height:100vh;
+  padding:20px;
+  overflow-x:hidden;
+}
+
+/* Main Card */
+.container{
+  width:100%;
+  max-width:900px;
+  background:rgba(255,255,255,0.95);
+  backdrop-filter:blur(15px);
+  border-radius:20px;
+  padding:35px;
+  box-shadow:0 25px 60px rgba(0,0,0,0.1);
+  animation:fadeIn .6s ease;
+  overflow:hidden;
+  transition:.3s;
+}
+
+@keyframes fadeIn{
+  from{opacity:0;transform:translateY(20px);}
+  to{opacity:1;transform:translateY(0);}
+}
+
+/* Header */
+.header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:20px;
+  flex-wrap:wrap;
+  gap:10px;
+}
+
+.title{
+  font-size:22px;
+  font-weight:600;
+  color:#1e3a8a;
+}
+
+.timer{
+  font-weight:600;
+  color:#dc2626;
+  font-size:16px;
+}
+
+/* Inputs */
+.input-group{
+  position:relative;
+  margin-bottom:20px;
+}
+
+.input-group input{
+  width:100%;
+  padding:14px;
+  border-radius:8px;
+  border:1px solid #cbd5e1;
+  background:#f8fbff;
+  outline:none;
+  transition:.3s;
+  font-size:15px;
+}
+
+.input-group label{
+  position:absolute;
+  top:50%;
+  left:14px;
+  transform:translateY(-50%);
+  background:#f8fbff;
+  padding:0 5px;
+  color:#64748b;
+  transition:.3s;
+  pointer-events:none;
+}
+
+.input-group input:focus,
+.input-group input:not(:placeholder-shown){
+  border-color:#2563eb;
+}
+
+.input-group input:focus + label,
+.input-group input:not(:placeholder-shown) + label{
+  top:0;
+  font-size:12px;
+  color:#2563eb;
+}
+
+.error{
+  color:red;
+  font-size:12px;
+  margin-top:-15px;
+  margin-bottom:10px;
+  display:none;
+}
+
+/* Buttons */
+button{
+  padding:12px 20px;
+  border:none;
+  border-radius:8px;
+  font-weight:600;
+  cursor:pointer;
+  transition:.3s;
+  font-size:15px;
+}
+
+.primary{
+  background:linear-gradient(90deg,#2563eb,#1d4ed8);
+  color:#fff;
+}
+
+.primary:hover{
+  transform:scale(1.05);
+}
+
+.secondary{
+  background:#cbd5e1;
+  color:#1e293b;
+}
+
+.secondary:hover{
+  background:#94a3b8;
+}
+
+/* Question */
+.question{
+  font-size:18px;
+  font-weight:600;
+  margin-bottom:15px;
+  color:#1e293b;
+  line-height:1.5;
+}
+
+.options{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+
+.options label{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:14px;
+  border-radius:10px;
+  background:#f1f5ff;
+  cursor:pointer;
+  transition:.3s;
+  border:1px solid transparent;
+  font-size:16px;
+}
+
+.options label:hover{
+  background:#dbeafe;
+  border:1px solid #2563eb;
+}
+
+.options input[type="radio"]{
+  transform:scale(1.2);
+}
+
+/* Buttons Group */
+.btn-group{
+  display:flex;
+  justify-content:space-between;
+  margin-top:25px;
+  gap:15px;
+}
+
+.btn-group button{
+  flex:1;
+}
+
+/* Progress */
+.progress-bar{
+  height:10px;
+  background:#dbeafe;
+  border-radius:10px;
+  overflow:hidden;
+  margin:15px 0 20px;
+}
+
+.progress{
+  height:100%;
+  width:0%;
+  background:linear-gradient(90deg,#2563eb,#1d4ed8);
+  transition:width .4s ease;
+}
+
+/* Result */
+.result-card{
+  background:#f8fbff;
+  padding:25px;
+  border-radius:15px;
+  margin-top:20px;
+  animation:fadeIn .5s ease;
+}
+
+.result-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:15px;
+  margin-top:15px;
+}
+
+.result-box{
+  background:#fff;
+  padding:18px;
+  border-radius:10px;
+  text-align:center;
+  border:1px solid #dbeafe;
+}
+
+.result-box span{
+  font-size:20px;
+  font-weight:700;
+  color:#2563eb;
+}
+
+.grade{
+  font-size:26px;
+  font-weight:700;
+  color:#16a34a;
+  margin-top:15px;
+  text-align:center;
+}
+
+/* Certificate */
+.certificate{
+  display:none;
+  margin-top:25px;
+  padding:25px;
+  background:#fff;
+  border:3px solid #2563eb;
+  border-radius:12px;
+  text-align:center;
+}
+
+.certificate h3{
+  color:#2563eb;
+  margin-bottom:10px;
+}
+
+.hide{
+  display:none;
+}
+
+/* ========================== */
+/* 🔥 ADVANCED RESPONSIVE 🔥 */
+/* ========================== */
+
+/* Tablets */
+@media (max-width:768px){
+
+  body{
+    align-items:flex-start;
+    padding:15px;
+  }
+
+  .container{
+    padding:22px;
+    border-radius:15px;
+  }
+
+  .header{
+    flex-direction:column;
+    align-items:flex-start;
+  }
+
+  .timer{
+    align-self:flex-end;
+  }
+
+  .result-grid{
+    grid-template-columns:1fr;
+  }
+
+  .btn-group{
+    flex-direction:column;
+  }
+
+  .btn-group button{
+    width:100%;
+  }
+
+}
+
+/* Mobile */
+@media (max-width:480px){
+
+  body{
+    padding:10px;
+  }
+
+  .container{
+    padding:16px;
+    border-radius:12px;
+  }
+
+  .title{
+    font-size:17px;
+  }
+
+  .timer{
+    font-size:14px;
+  }
+
+  .question{
+    font-size:15px;
+  }
+
+  .options label{
+    font-size:14px;
+    padding:12px;
+  }
+
+  button{
+    font-size:14px;
+    padding:11px;
+  }
+
+  .certificate{
+    padding:18px;
+  }
+
+}
+
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<!-- Registration -->
+<div id="registration">
+<h2 style="color:#1e3a8a;margin-bottom:20px;">Candidate Registration</h2>
+<div class="input-group">
+<input type="text" id="name" placeholder=" " />
+<label>Full Name</label>
+</div>
+<div class="error" id="nameError">Name must be at least 3 letters long and contain no numbers </div>
+
+<div class="input-group">
+<input type="email" id="email" placeholder=" " />
+<label>Email Address</label>
+</div>
+<div class="error" id="emailError">Please Enter Valid Email</div>
+
+<div class="input-group">
+<input type="number" id="age" placeholder=" " />
+<label>Age (14-60)</label>
+</div>
+<div class="error" id="ageError">Age must be between 14 and 60</div>
+
+<button class="primary" style="width:100%;" onclick="validateUser(); startQuiz();">Start Assessment</button>
+</div>
+
+<!-- Quiz -->
+<div id="quizBox" class="hide">
+<div class="header">
+<div class="title">Online Assessment</div>
+<div class="timer">Time Left: <span id="time">15:00</span></div>
+</div>
+
+<div class="progress-bar">
+<div class="progress" id="progress"></div>
+</div>
+
+<div id="questionBox"></div>
+
+<div class="btn-group">
+<button class="secondary" onclick="prevQuestion()">Previous</button>
+<button class="primary" onclick="nextQuestion()" id="nextBtn">Next</button>
+</div>
+</div>
+
+<!-- Result -->
+<div id="result" class="hide"></div>
+
+</div>
+
+<script>
+// ===== Questions =====
+const questionBank=[
+ {q:"What is the capital of Pakistan?",o:["Karachi","Lahore","Islamabad","Peshawar"],a:2},
+{q:"Who is the founder of Pakistan?",o:["Allama Iqbal","Liaquat Ali Khan","Quaid-e-Azam","Ayub Khan"],a:2},
+{q:"Which is the largest continent?",o:["Asia","Africa","Europe","Australia"],a:0},
+{q:"Which river is the longest in the world?",o:["Amazon","Nile","Yangtze","Indus"],a:1},
+{q:"Which country has the largest population?",o:["USA","India","China","Russia"],a:2},
+{q:"What is the currency of Japan?",o:["Yuan","Yen","Won","Dollar"],a:1},
+{q:"Who invented the telephone?",o:["Newton","Edison","Alexander Graham Bell","Tesla"],a:2},
+{q:"Which planet is closest to the sun?",o:["Venus","Mercury","Earth","Mars"],a:1},
+{q:"Which is the smallest continent?",o:["Asia","Europe","Australia","Antarctica"],a:2},
+{q:"Which country is famous for pyramids?",o:["India","Mexico","Egypt","Greece"],a:2},
+{q:"Which ocean is the deepest?",o:["Atlantic","Pacific","Indian","Arctic"],a:1},
+{q:"What is the national animal of Pakistan?",o:["Lion","Markhor","Tiger","Leopard"],a:1},
+{q:"Who wrote the national anthem of Pakistan?",o:["Iqbal","Hafeez Jalandhari","Faiz","Ghalib"],a:1},
+{q:"Which gas is most abundant in the atmosphere?",o:["Oxygen","Nitrogen","Carbon Dioxide","Hydrogen"],a:1},
+{q:"Which country gifted the Statue of Liberty to USA?",o:["France","UK","Germany","Italy"],a:0},
+{q:"Who discovered gravity?",o:["Einstein","Newton","Galileo","Darwin"],a:1},
+{q:"Which is the largest desert?",o:["Sahara","Gobi","Thar","Arabian"],a:0},
+{q:"Which vitamin is obtained from sunlight?",o:["A","B","C","D"],a:3},
+{q:"What is the hardest natural substance?",o:["Gold","Iron","Diamond","Silver"],a:2},
+{q:"Which organ purifies blood?",o:["Heart","Kidney","Lungs","Liver"],a:1},
+{q:"Who painted Mona Lisa?",o:["Van Gogh","Picasso","Da Vinci","Michelangelo"],a:2},
+{q:"Which country is known as Land of Rising Sun?",o:["China","Japan","Thailand","Korea"],a:1},
+{q:"Which is the fastest bird?",o:["Eagle","Falcon","Sparrow","Owl"],a:1},
+{q:"Which metal is liquid at room temperature?",o:["Iron","Mercury","Copper","Aluminum"],a:1},
+{q:"What is the boiling point of water?",o:["90°C","100°C","110°C","80°C"],a:1},
+{q:"Which country won FIFA 2022?",o:["Brazil","France","Argentina","Germany"],a:2},
+{q:"Which is the largest island?",o:["Greenland","Iceland","Maldives","Borneo"],a:0},
+{q:"Who invented electricity?",o:["Tesla","Edison","Benjamin Franklin","Newton"],a:2},
+{q:"Which is the tallest mountain?",o:["K2","Everest","Nanga Parbat","Kilimanjaro"],a:1},
+{q:"Which is the national flower of Pakistan?",o:["Rose","Jasmine","Tulip","Lily"],a:1},
+];
+
+let totalQuestions=20, quizQuestions=[], currentIndex=0, answers=[], timeLeft=900, timer;
+let userData={}, candidatesData=[];
+
+// ===== Validation =====
+function validateUser(){
+  let name=document.getElementById("name").value.trim();
+  let email=document.getElementById("email").value.trim();
+  let age=document.getElementById("age").value.trim();
+  let valid=true;
+
+  if(name.length<3 || /\d/.test(name)){showError("nameError"); valid=false;}else hideError("nameError");
+  let pattern=/^[^ ]+@[^ ]+\.[a-z]{2,3}$/;
+  if(!email.match(pattern)){showError("emailError"); valid=false;}else hideError("emailError");
+  if(isNaN(age) || age<14 || age>60){showError("ageError"); valid=false;}else hideError("ageError");
+
+  if(valid){
+    userData={Name:name,Email:email,Age:age};
+    document.getElementById("registration").classList.add("hide");
+    document.getElementById("quizBox").classList.remove("hide");
+  }
+}
+function showError(id){document.getElementById(id).style.display="block";}
+function hideError(id){document.getElementById(id).style.display="none";}
+
+// ===== Quiz =====
+function startQuiz(){quizQuestions=[...questionBank]; currentIndex=0; answers=Array(totalQuestions).fill(null); showQuestion(); startTimer(); updateProgress();}
+function showQuestion(){
+  let q=quizQuestions[currentIndex];
+  let html=`<div class="question">${currentIndex+1}. ${q.q}</div><div class="options">`;
+  q.o.forEach((opt,i)=> html+=`<label><input type="radio" name="option" value="${i}" ${answers[currentIndex]===i?"checked":""}>${opt}</label>`);
+  html+="</div>";
+  document.getElementById("questionBox").innerHTML=html;
+  document.getElementById("nextBtn").innerText=currentIndex===quizQuestions.length-1?"Submit":"Next";
+  updateProgress();
+}
+function saveAnswer(){let sel=document.querySelector("input[name='option']:checked"); if(sel) answers[currentIndex]=parseInt(sel.value);}
+function nextQuestion(){ saveAnswer(); if(currentIndex===quizQuestions.length-1) submitQuiz(); else{currentIndex++; showQuestion();} }
+function prevQuestion(){ saveAnswer(); if(currentIndex>0){currentIndex--; showQuestion();} }
+function updateProgress(){document.getElementById("progress").style.width=((currentIndex+1)/quizQuestions.length)*100+"%";}
+function startTimer(){timer=setInterval(()=>{timeLeft--; let min=Math.floor(timeLeft/60), sec=timeLeft%60; document.getElementById("time").innerText=`${min}:${sec<10?"0"+sec:sec}`; if(timeLeft<=0){clearInterval(timer); submitQuiz();}},1000);}
+
+// ===== Submit =====
+async function submitQuiz(){
+  clearInterval(timer); let correct=0;
+  quizQuestions.forEach((q,i)=>{ if(answers[i]===q.a) correct++; });
+  let percent=((correct/quizQuestions.length)*100).toFixed(2); let grade=percent>=80?"A":percent>=60?"B":"C";
+  let timeTaken=900-timeLeft; let passed=grade!=="C";
+
+  // Student attempt data
+  let attemptData={
+    Name:userData.Name, Email:userData.Email, Age:userData.Age,
+    Score:correct, Percentage:percent+"%", TimeTaken:`${Math.floor(timeTaken/60)}:${(timeTaken%60<10?"0":"")+(timeTaken%60)}`,
+    Grade:grade, Result:passed?"Pass":"Fail"
+  };
+
+  // Send data to backend
+  const backendURL = 'http://localhost:3000/save-attempt';
+  try {
+    const response = await fetch(backendURL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(attemptData)
+    });
+    if (response.ok) {
+      console.log('Data sent to backend successfully');
+      // alert('Data saved to server!');  // Added for confirmation
+    } else {
+      console.error('Failed to send data to backend:', response.statusText);
+      // alert('Failed to save data. Check server.');  // Added for error
+    }
+  } catch (error) {
+    console.error('Error sending data:', error);
+    alert('Error connecting to server.');  // Added for error
+  }
+
+  // For local console logging (optional, remove if not needed)
+  candidatesData.push(attemptData);
+  console.log("All Attempts:", candidatesData);
+
+  document.getElementById("quizBox").classList.add("hide");
+  let result=document.getElementById("result"); result.classList.remove("hide");
+
+  let certificateBtn=passed?`<button class="primary" onclick="generateCertificate()">Generate Certificate</button>`:"";
+
+  result.innerHTML=`
+  <div class="result-card">
+    <h2>Assessment Report</h2>
+    <p><strong>Name:</strong> ${userData.Name}</p>
+    <div class="result-grid">
+      <div class="result-box">Score <span>${correct}/${quizQuestions.length}</span></div>
+      <div class="result-box">Percentage <span>${percent}%</span></div>
+    </div>
+    <div class="grade">Grade: ${grade}</div>
+    <p><strong>Time Taken:</strong> ${Math.floor(timeTaken/60)}:${(timeTaken%60<10?"0":"")+(timeTaken%60)} minutes</p>
+    <div style="margin-top:20px;text-align:center;">
+      ${certificateBtn}
+      <button class="secondary" onclick="restartTest()">Restart Test</button>
+    </div>
+    <div class="certificate" id="certificate">
+      <h3>Certificate of Completion</h3>
+      <p>Ye certify karta hai ke <strong>${userData.Name}</strong> ne assessment complete kiya hai grade <strong>${grade}</strong> ke sath.</p>
+      <p>Score: ${correct}/${quizQuestions.length} | Percentage: ${percent}%</p>
+      <p>Date: ${new Date().toLocaleDateString()}</p>
+      <button class="primary" onclick="printCertificate()">Print Certificate</button>
+    </div>
+  </div>`;
+}
+
+// ===== Certificate =====
+function generateCertificate(){document.getElementById("certificate").style.display="block";}
+function printCertificate(){window.print();}
+
+// ===== Restart =====
+function restartTest(){answers=Array(totalQuestions).fill(null); currentIndex=0; timeLeft=900;
+document.getElementById("result").classList.add("hide"); document.getElementById("registration").classList.remove("hide");
+document.getElementById("name").value=""; document.getElementById("email").value=""; document.getElementById("age").value="";}
+</script>
+</body>
+</html>

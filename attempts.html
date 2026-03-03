@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Professional Quiz Admin Panel</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+:root{
+  --primary:#6366f1;
+  --success:#10b981;
+  --danger:#ef4444;
+  --bg:#f8fafc;
+  --card:#ffffff;
+  --text:#1e293b;
+  --border:#e2e8f0;
+}
+
+body.dark{
+  --bg:#111827;
+  --card:#1f2937;
+  --text:#f9fafb;
+  --border:#374151;
+}
+
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Inter',sans-serif;}
+
+body{
+  background:var(--bg);
+  color:var(--text);
+  display:flex;
+  min-height:100vh;
+}
+
+/* SIDEBAR */
+.sidebar{
+  width:260px;
+  background:var(--card);
+  border-right:1px solid var(--border);
+  padding:25px 15px;
+  display:flex;
+  flex-direction:column;
+  gap:20px;
+  position:fixed;
+  height:100%;
+}
+
+.logo{
+  font-size:22px;
+  font-weight:700;
+  color:var(--primary);
+  text-align:center;
+}
+
+.nav{display:flex;flex-direction:column;gap:10px;}
+
+.nav a{
+  padding:10px 15px;
+  border-radius:10px;
+  cursor:pointer;
+  font-weight:500;
+  transition:0.3s;
+}
+
+.nav a:hover,.nav a.active{
+  background:var(--primary);
+  color:#fff;
+}
+
+/* MAIN */
+.main{
+  margin-left:260px;
+  flex:1;
+  padding:40px;
+  display:flex;
+  flex-direction:column;
+  gap:35px;
+}
+
+/* HEADER */
+.header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:15px;
+}
+
+.header h1{
+  font-size:26px;
+  font-weight:700;
+}
+
+/* BUTTONS */
+.btn{
+  padding:10px 18px;
+  border-radius:8px;
+  border:none;
+  cursor:pointer;
+  font-weight:600;
+  transition:0.3s;
+}
+.btn-primary{background:var(--primary);color:#fff;}
+.btn-secondary{background:#e2e8f0;}
+.btn-danger{background:var(--danger);color:#fff;}
+.btn:hover{opacity:0.9;}
+
+/* CARDS */
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:20px;
+  box-shadow:0 4px 10px rgba(0,0,0,0.05);
+}
+
+.stats{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+  gap:20px;
+}
+
+.card h2{font-size:28px;margin-bottom:5px;}
+.card p{color:gray;font-size:14px;}
+
+/* SEARCH */
+.search-box{
+  display:flex;
+  justify-content:flex-end;
+}
+
+.search-box input{
+  padding:8px 12px;
+  border-radius:8px;
+  border:1px solid var(--border);
+  width:250px;
+}
+
+/* TABLE */
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:15px;
+}
+th,td{
+  padding:12px;
+  border-bottom:1px solid var(--border);
+  text-align:center;
+}
+th{background:var(--bg);}
+tr:hover{background:rgba(99,102,241,0.08);}
+
+.result-badge{
+  padding:4px 10px;
+  border-radius:10px;
+  font-weight:600;
+  color:#fff;
+}
+.result-pass{background:var(--success);}
+.result-fail{background:var(--danger);}
+
+/* PAGINATION */
+.pagination{
+  display:flex;
+  justify-content:center;
+  gap:8px;
+  margin-top:15px;
+}
+.pagination button{
+  padding:6px 12px;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+  background:var(--primary);
+  color:#fff;
+}
+
+/* SECTIONS */
+.section{display:none;}
+.section.active{display:block;}
+
+/* TOAST */
+.toast{
+  position:fixed;
+  bottom:20px;
+  right:20px;
+  background:var(--primary);
+  color:#fff;
+  padding:10px 18px;
+  border-radius:8px;
+  opacity:0;
+  transition:0.4s;
+}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  .sidebar{display:none;}
+  .main{margin-left:0;}
+}
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+  <div class="logo">Admin Panel</div>
+  <div class="nav">
+    <a onclick="switchSection('dashboard',this)" class="active">Dashboard</a>
+    <a onclick="switchSection('attempts',this)">Attempts</a>
+    <a onclick="switchSection('analytics',this)">Analytics</a>
+    <a onclick="switchSection('settings',this)">Settings</a>
+  </div>
+</div>
+
+<div class="main">
+
+<!-- DASHBOARD -->
+<div id="dashboard" class="section active">
+  <div class="header"><h1>Dashboard</h1></div>
+  <div class="stats">
+    <div class="card"><h2 id="totalAttempts">0</h2><p>Total Attempts</p></div>
+    <div class="card"><h2 id="totalPass">0</h2><p>Passed</p></div>
+    <div class="card"><h2 id="totalFail">0</h2><p>Failed</p></div>
+    <div class="card"><h2 id="avgScore">0</h2><p>Average Score</p></div>
+  </div>
+</div>
+
+<!-- ATTEMPTS -->
+<div id="attempts" class="section">
+  <div class="header">
+    <h1>Attempts</h1>
+    <div>
+      <button class="btn btn-primary" onclick="loadData()">Refresh</button>
+      <button class="btn btn-secondary" onclick="exportCSV()">Export CSV</button>
+    </div>
+  </div>
+
+  <div class="search-box">
+    <input type="text" placeholder="Search..." onkeyup="searchData(this.value)">
+  </div>
+
+  <div class="card">
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Score</th>
+          <th>Result</th>
+          <th>Date</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+    <div class="pagination" id="pagination"></div>
+  </div>
+</div>
+
+<!-- ANALYTICS -->
+<div id="analytics" class="section">
+  <div class="header"><h1>Analytics</h1></div>
+  <div class="stats">
+    <div class="card"><canvas id="lineChart"></canvas></div>
+    <div class="card"><canvas id="pieChart"></canvas></div>
+  </div>
+</div>
+
+<!-- SETTINGS -->
+<div id="settings" class="section">
+  <div class="header"><h1>Settings</h1></div>
+  <div class="card">
+    <button class="btn btn-primary" onclick="toggleTheme()">Toggle Dark Mode</button>
+  </div>
+</div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const backendURL="http://localhost:3000";
+let globalData=[];
+let filteredData=[];
+let rowsPerPage=5;
+let currentPage=1;
+let lineChartInstance=null;
+let pieChartInstance=null;
+
+// ==========================
+// LOAD REAL DATA FROM SERVER
+// ==========================
+async function loadData(){
+  showLoader(true);
+  try{
+    const res=await fetch(`${backendURL}/attempts`);
+    globalData=await res.json();
+    filteredData=[...globalData];
+    updateStatsAnimated();
+    renderTable();
+    renderCharts();
+    showToast("Data Synced Successfully");
+  }catch(err){
+    showToast("Server Error");
+  }
+  showLoader(false);
+}
+
+// ==========================
+// TABLE
+// ==========================
+function renderTable(){
+  const tbody=document.getElementById("tableBody");
+  tbody.innerHTML="";
+
+  if(filteredData.length===0){
+    tbody.innerHTML="<tr><td colspan='6'>No Attempts Found</td></tr>";
+    return;
+  }
+
+  let start=(currentPage-1)*rowsPerPage;
+  let end=start+rowsPerPage;
+
+  filteredData.slice(start,end).forEach(d=>{
+    tbody.innerHTML+=`
+    <tr>
+      <td>${d.Name}</td>
+      <td>${d.Email}</td>
+      <td><b>${d.Score}</b></td>
+      <td>
+        <span class="result-badge ${d.Result==="Pass"?"result-pass":"result-fail"}">
+          ${d.Result}
+        </span>
+      </td>
+      <td>${new Date(d.Timestamp).toLocaleDateString()}</td>
+      <td>
+        <button class="btn btn-danger" onclick="deleteRow('${d.id}')">
+          Delete
+        </button>
+      </td>
+    </tr>`;
+  });
+
+  renderPagination();
+}
+
+// ==========================
+// DELETE REAL (Backend)
+// ==========================
+async function deleteRow(id){
+  if(!confirm("Are you sure you want to delete this attempt?")) return;
+
+  try{
+    const res=await fetch(`${backendURL}/attempt/${id}`,{
+      method:"DELETE"
+    });
+
+    const data=await res.json();
+
+    if(res.ok){
+      showToast("Deleted Successfully");
+      loadData();
+    }else{
+      showToast(data.message);
+    }
+
+  }catch(err){
+    showToast("Delete Failed");
+  }
+}
+
+// ==========================
+// PAGINATION
+// ==========================
+function renderPagination(){
+  const container=document.getElementById("pagination");
+  container.innerHTML="";
+  let totalPages=Math.ceil(filteredData.length/rowsPerPage);
+
+  for(let i=1;i<=totalPages;i++){
+    container.innerHTML+=`
+      <button onclick="goToPage(${i})"
+      style="${i===currentPage?'background:#4f46e5':''}">
+      ${i}
+      </button>`;
+  }
+}
+
+function goToPage(p){
+  currentPage=p;
+  renderTable();
+}
+
+// ==========================
+// SEARCH
+// ==========================
+function searchData(val){
+  filteredData=globalData.filter(d=>
+    d.Name.toLowerCase().includes(val.toLowerCase())||
+    d.Email.toLowerCase().includes(val.toLowerCase())
+  );
+  currentPage=1;
+  renderTable();
+}
+
+// ==========================
+// STATS ANIMATION
+// ==========================
+function animateValue(id,end){
+  let start=0;
+  let duration=500;
+  let range=end-start;
+  let increment=range/20;
+  let stepTime=Math.abs(Math.floor(duration/20));
+  let obj=document.getElementById(id);
+
+  let timer=setInterval(()=>{
+    start+=increment;
+    obj.innerText=Math.floor(start);
+    if(start>=end){
+      obj.innerText=end;
+      clearInterval(timer);
+    }
+  },stepTime);
+}
+
+function updateStatsAnimated(){
+  animateValue("totalAttempts",globalData.length);
+  animateValue("totalPass",
+    globalData.filter(a=>a.Result==="Pass").length);
+  animateValue("totalFail",
+    globalData.filter(a=>a.Result==="Fail").length);
+
+  let avg=(globalData.reduce((s,a)=>s+a.Score,0)/
+          (globalData.length||1)).toFixed(2);
+
+  document.getElementById("avgScore").innerText=avg;
+}
+
+// ==========================
+// CHARTS PROFESSIONAL
+// ==========================
+function renderCharts(){
+
+  if(lineChartInstance) lineChartInstance.destroy();
+  if(pieChartInstance) pieChartInstance.destroy();
+
+  const lineCtx=document.getElementById("lineChart");
+  const pieCtx=document.getElementById("pieChart");
+
+  const scores=globalData.map(d=>d.Score);
+
+  lineChartInstance=new Chart(lineCtx,{
+    type:'line',
+    data:{
+      labels:globalData.map((_,i)=>`Attempt ${i+1}`),
+      datasets:[{
+        label:'Scores Trend',
+        data:scores,
+        borderColor:'#6366f1',
+        backgroundColor:'rgba(99,102,241,0.1)',
+        fill:true,
+        tension:0.4
+      }]
+    }
+  });
+
+  pieChartInstance=new Chart(pieCtx,{
+    type:'doughnut',
+    data:{
+      labels:['Pass','Fail'],
+      datasets:[{
+        data:[
+          globalData.filter(a=>a.Result==="Pass").length,
+          globalData.filter(a=>a.Result==="Fail").length
+        ],
+        backgroundColor:['#10b981','#ef4444']
+      }]
+    }
+  });
+}
+
+// ==========================
+// THEME
+// ==========================
+function toggleTheme(){
+  document.body.classList.toggle("dark");
+}
+
+// ==========================
+// LOADER
+// ==========================
+function showLoader(state){
+  let loader=document.getElementById("loader");
+  if(!loader){
+    loader=document.createElement("div");
+    loader.id="loader";
+    loader.innerHTML="Loading...";
+    loader.style.position="fixed";
+    loader.style.top="50%";
+    loader.style.left="50%";
+    loader.style.transform="translate(-50%,-50%)";
+    loader.style.background="#6366f1";
+    loader.style.color="#fff";
+    loader.style.padding="15px 30px";
+    loader.style.borderRadius="8px";
+    document.body.appendChild(loader);
+  }
+  loader.style.display=state?"block":"none";
+}
+
+// ==========================
+function showToast(msg){
+  const toast=document.getElementById("toast");
+  toast.innerText=msg;
+  toast.style.opacity="1";
+  setTimeout(()=>toast.style.opacity="0",3000);
+}
+
+// ==========================
+window.onload=loadData;
+</script>
+
+</body>
+</html>
